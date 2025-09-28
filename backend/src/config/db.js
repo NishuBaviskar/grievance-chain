@@ -1,32 +1,21 @@
 // ====================================================================================
-// GrievanceChain Project - Database Configuration (Final, Production Version)
+// GrievanceChain Project - Database Configuration (Final, PostgreSQL Version)
 // ====================================================================================
-// This file configures the database connection pool. It is now updated to support
-// secure SSL/TLS connections, which are required for cloud databases like TiDB Cloud.
+// This file configures the database connection pool for PostgreSQL,
+// which is used for the simplified Render deployment.
 // ====================================================================================
 
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg'); // Import the pg Pool
 require('dotenv').config();
 
-// Create the connection pool with the configuration from the .env file.
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  multipleStatements: true,
-
-  // <<< THE FIX: Enable SSL for secure cloud database connections >>>
-  // The `mysql2` library automatically uses TLS when the host ends in .tidbcloud.com
-  // but explicitly defining it is best practice for production.
-  ssl: {
-    // This tells the driver to reject any connection that is not properly secured.
-    rejectUnauthorized: true 
-  }
+// Create a new connection pool.
+// When deployed on Render, it will automatically use the DATABASE_URL environment variable.
+// For local development, it will use the credentials from your .env file.
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
+// We export the entire pool. When we need to run a query,
+// we will ask the pool for a client.
 module.exports = pool;
