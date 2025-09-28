@@ -1,0 +1,17 @@
+Your MySQL Server
+
+IPFS Desktop
+
+backend: 1
+npm run ganache:persistent
+
+backend:2
+npm run deploy
+node reset-and-seed.js
+npm run dev
+
+frontend
+npm run dev
+
+student1@gmail.com
+admin2@gmail.com
